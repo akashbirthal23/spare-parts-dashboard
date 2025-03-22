@@ -1,0 +1,69 @@
+/* Table Header Links */
+th a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  /* Highlight the selected row */
+  tr.selected-row {
+    background-color: #e7f3ff !important;
+  }
+  
+  /* Material Code icon prefix */
+  .material-link::before {
+    content: "🔍 ";
+    margin-right: 4px;
+  }
+  
+  /* Badges for PR/PO styling */
+  a.badge {
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.45em 0.65em;
+    margin-right: 4px;
+  }
+  
+  /* Subtle text for missing data */
+  .text-muted {
+    font-style: italic;
+    opacity: 0.75;
+  }
+  
+  /* Form & dropdown enhancements */
+  .form-select,
+  .form-control {
+    font-size: 0.95rem;
+    border-radius: 0.4rem;
+  }
+  
+  /* Form spacing */
+  .form-floating label {
+    padding-left: 0.75rem;
+  }
+  
+  /* Consistent padding for floating selects */
+  .form-floating > .form-select {
+    padding-top: 1.3rem;
+    padding-bottom: 0.3rem;
+  }
+  
+  /* Card layout enhancements */
+  .card {
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .form-floating label {
+      font-size: 0.85rem;
+    }
+  
+    a.badge {
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+  }
+  

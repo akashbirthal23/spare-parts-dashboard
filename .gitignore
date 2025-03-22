@@ -1,0 +1,31 @@
+# 🔹 Python cache
+__pycache__/
+*.py[cod]
+*.log
+
+# 🔹 Flask environment files
+.env
+.env.*
+
+# 🔹 Virtual environment
+venv/
+.venv/
+
+# 🔹 Excel files & data folder
+data/
+*.xlsx
+*.xls
+
+# 🔹 Ignore these scripts (upload/update scripts)
+po.py
+pr.py
+sap_stock.py
+spare_parts.py
+
+# 🔹 IDE/project files
+.vscode/
+.idea/
+
+# 🔹 OS files
+.DS_Store
+Thumbs.db

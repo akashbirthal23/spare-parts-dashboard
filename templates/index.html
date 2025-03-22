@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spare Parts</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" />
+</head>
+<body>
+  <div class="container">
+    <div class="card shadow-sm border-0 mt-4">
+      <div class="card-body">
+        <h3 class="card-title mb-4 fw-semibold">Spare Parts Overview</h3>
+
+        <!-- 🔍 Filter Controls -->
+        <form class="row gy-2 gx-3 align-items-end mb-4" method="get">
+            <!-- 🔍 Search -->
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="searchBox" name="search" placeholder="Search parts..." value="{{ search }}" />
+                <label for="searchBox">Search parts...</label>
+              </div>
+            </div>
+            <!-- 🔘 Apply Button -->
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">Search</button>
+              </div>
+            <!-- 📦 PR Filter -->
+            <div class="col-md-2">
+              <div class="form-floating">
+                <select class="form-select" id="prFilter" name="pr_filter" onchange="this.form.submit()">
+                  <option value="1y" {% if pr_filter == '1y' %}selected{% endif %}>PRs from last 1 year</option>
+                  <option value="all" {% if pr_filter == 'all' %}selected{% endif %}>All PRs</option>
+                </select>
+                <label for="prFilter">PR Filter</label>
+              </div>
+            </div>
+          
+            <!-- 📄 PO Filter -->
+            <div class="col-md-2">
+              <div class="form-floating">
+                <select class="form-select" id="poFilter" name="po_filter" onchange="this.form.submit()">
+                  <option value="1y" {% if po_filter == '1y' %}selected{% endif %}>POs from last 1 year</option>
+                  <option value="all" {% if po_filter == 'all' %}selected{% endif %}>All POs</option>
+                </select>
+                <label for="poFilter">PO Filter</label>
+              </div>
+            </div>
+          
+          </form>
+          
+  
+
+        <!-- Data Table -->
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Equipment Name</th>
+                <th>Material Code</th>
+                <th>Description</th>
+                <th>Part No</th>
+                <th>Assembly</th>
+                <th>SAP Stock</th>
+                <th>PR Number</th>
+                <th>PO Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr>
+                <td>{{ row.equipment_name }}</td>
+                <td>
+                  <a href="#" class="material-link text-decoration-none"
+                    data-bs-toggle="modal"
+                    data-bs-target="#detailModal"
+                    data-material_code="{{ row.material_code }}"
+                    data-equipment_name="{{ row.equipment_name }}"
+                    data-material_description="{{ row.material_description }}"
+                    data-part_no="{{ row.part_no }}"
+                    data-assembly="{{ row.assembly }}"
+                    data-pos_no="{{ row.pos_no }}"
+                    data-installed_qty="{{ row.installed_qty }}"
+                    data-remark="{{ row.remark }}">
+                    {{ row.material_code }}
+                  </a>
+                </td>
+                <td>{{ row.material_description }}</td>
+                <td>{{ row.part_no }}</td>
+                <td>{{ row.assembly }}</td>
+                <td>{{ row.sap_stock }}</td>
+                <td>
+                  {% if row.prs %}
+                    {% for pr in row.prs %}
+                      <a href="#" class="badge text-bg-info text-decoration-none pr-link"
+                         data-bs-toggle="modal"
+                         data-bs-target="#prModal"
+                         data-pr_number="{{ pr.pr_number }}"
+                         data-quantity="{{ pr.quantity_requested }}"
+                         data-date="{{ pr.pr_date }}">
+                         {{ pr.pr_number }}
+                      </a>
+                      {% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    <span class="text-muted">No PR</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if row.pos %}
+                    {% for po in row.pos %}
+                      <a href="#" class="badge text-bg-success text-decoration-none po-link"
+                         data-bs-toggle="modal"
+                         data-bs-target="#poModal"
+                         data-po_number="{{ po.po_number }}"
+                         data-quantity="{{ po.order_quantity }}"
+                         data-date="{{ po.po_release_date }}"
+                         data-vendor="{{ po.vendor_name }}">
+                         {{ po.po_number }}
+                      </a>
+                      {% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    <span class="text-muted">No PO</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+
+    <!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            Details for Material Code: <span id="modalMaterialCode"></span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group">
+            <li class="list-group-item"><strong>Equipment Name:</strong> <span id="modalEquipmentName"></span></li>
+            <li class="list-group-item"><strong>Material Description:</strong> <span id="modalMaterialDescription"></span></li>
+            <li class="list-group-item"><strong>Part No:</strong> <span id="modalPartNo"></span></li>
+            <li class="list-group-item"><strong>Assembly:</strong> <span id="modalAssembly"></span></li>
+            <li class="list-group-item"><strong>Pos No:</strong> <span id="modalPosNo"></span></li>
+            <li class="list-group-item"><strong>Installed Qty:</strong> <span id="modalInstalledQty"></span></li>
+            <li class="list-group-item"><strong>Remark:</strong> <span id="modalRemark"></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- PR Details Modal -->
+<div class="modal fade" id="prModal" tabindex="-1" aria-labelledby="prModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">PR Details: <span id="modalPrNumber"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group">
+            <li class="list-group-item">
+              <strong>Quantity Requested:</strong> <span id="modalPrQty"></span>
+            </li>
+            <li class="list-group-item">
+              <strong>PR Date:</strong> <span id="modalPrDate"></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="poModal" tabindex="-1" aria-labelledby="poModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">PO Details: <span id="modalPoNumber"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="list-group">
+            <li class="list-group-item"><strong>Order Quantity:</strong> <span id="modalPoQty"></span></li>
+            <li class="list-group-item"><strong>Release Date:</strong> <span id="modalPoDate"></span></li>
+            <li class="list-group-item"><strong>Vendor:</strong> <span id="modalPoVendor"></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center">
+          {% if page > 1 %}
+          <li class="page-item">
+            <a class="page-link" href="?search={{ search }}&sort={{ sort }}&order={{ order }}&po_filter={{ po_filter }}&page={{ page - 1 }}">« Previous</a>
+          </li>
+          {% endif %}
+          <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+          {% if page < total_pages %}
+          <li class="page-item">
+            <a class="page-link" href="?search={{ search }}&sort={{ sort }}&order={{ order }}&po_filter={{ po_filter }}&pr_filter={{ pr_filter }}&page={{ page + 1 }}">Next »</a>
+
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
